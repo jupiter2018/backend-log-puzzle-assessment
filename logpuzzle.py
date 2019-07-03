@@ -37,10 +37,11 @@ def read_urls(filename):
         for line in f:
             searchurl = re.search('GET\s\S+(\w+-\w+-\w*\\.jpg)\sHTTP', line)
             if searchurl:
+                print(searchurl.group())
                 searchurl = "https://developers.google.com/" + \
                     "edu/python/images/puzzle/" + searchurl.group(1)
                 infolist.append(searchurl)
-
+    print(infolist)
     return sorted(set(infolist), key=mysort)
 
 
