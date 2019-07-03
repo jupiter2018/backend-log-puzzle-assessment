@@ -12,7 +12,10 @@ http://code.google.com/edu/languages/google-python-class/
 Given an apache logfile, find the puzzle urls and download the images.
 
 Here's what a puzzle url looks like:
-10.254.254.28 - - [06/Aug/2007:00:13:48 -0700] "GET /~foo/puzzle-bar-aaab.jpg HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
+10.254.254.28 - - [06/Aug/2007:00:13:48 -0700]
+"GET /~foo/puzzle-bar-aaab.jpg HTTP/1.0"
+302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.6)
+Gecko/20070725 Firefox/2.0.0.6"
 
 """
 
@@ -29,7 +32,25 @@ def read_urls(filename):
     Screens out duplicate urls and returns the urls sorted into
     increasing order."""
     # +++your code here+++
-    pass
+    infolist = []
+    with open(filename, 'r') as f:
+        for line in f:
+            searchurl = re.search('GET\s\S+(\w+-\w+-\w*\\.jpg)\sHTTP', line)
+            if searchurl:
+                searchurl = "https://developers.google.com/" + \
+                    "edu/python/images/puzzle/" + searchurl.group(1)
+                infolist.append(searchurl)
+
+    return sorted(set(infolist), key=mysort)
+
+
+def mysort(cururl):
+    print(cururl)
+    searchurl = re.search('\w+-\w+-(\w+)\\.jpg', cururl)
+    if searchurl:
+        return searchurl.group(1)
+    else:
+        return cururl
 
 
 def download_images(img_urls, dest_dir):
@@ -41,13 +62,27 @@ def download_images(img_urls, dest_dir):
     Creates the directory if necessary.
     """
     # +++your code here+++
-    pass
+    if not os.path.exists(dest_dir):
+        os.mkdir(dest_dir)
+
+    for i, img_url in enumerate(img_urls):
+        print("Retrieving...")
+
+        filename = dest_dir + "/img" + str(i)
+        urllib.urlretrieve(img_url, filename)
+    htmlstr = "<html><body>"
+    for curfile in os.listdir(dest_dir):
+        htmlstr += "<img src=" + curfile + ">"
+    htmlstr += "</body></html>"
+    with open(dest_dir + "/index.html", 'w') as f:
+        f.write(htmlstr)
 
 
 def create_parser():
     """Create an argument parser object"""
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--todir',  help='destination directory for downloaded images')
+    parser.add_argument(
+        '-d', '--todir',  help='destination directory for downloaded images')
     parser.add_argument('logfile', help='apache logfile to extract urls from')
 
     return parser
